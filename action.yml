@@ -1,0 +1,15 @@
+name: 'ectomigo'
+description: 'index data access and manipulation code, then report on any detected migrations'
+inputs:
+  migration_paths:
+    description: 'process any changed files matching these comma-separated globs'
+    required: false
+  ignore_paths:
+    description: 'ignore files matching these comma-separated globs while indexing'
+    required: false
+  patterns:
+    description: 'JSON mapping named data access patterns to glob arrays, e.g. {"massive": ["**/*"]}'
+    required: false
+runs:
+  using: 'node16'
+  main: 'index.js'

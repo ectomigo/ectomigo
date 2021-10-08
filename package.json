@@ -1,0 +1,29 @@
+{
+  "name": "ectomigo-github",
+  "version": "0.0.1",
+  "description": "ectomigo github action",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dian M Fay",
+  "dependencies": {
+    "@actions/core": "^1.5.0",
+    "@actions/github": "^5.0.0",
+    "@actions/glob": "^0.2.0",
+    "axios": "^0.21.4",
+    "change-case": "^4.1.2",
+    "commander": "^8.2.0",
+    "form-data": "^4.0.0",
+    "globby": "^12.0.2",
+    "lodash": "^4.17.21",
+    "minimatch": "^3.0.4",
+    "tree-sitter": "^0.19.0",
+    "tree-sitter-java": "^0.19.1",
+    "tree-sitter-javascript": "^0.19.0",
+    "tree-sitter-python": "^0.19.0",
+    "tree-sitter-sql": "github:DerekStride/tree-sitter-sql",
+    "uuid": "^8.3.2"
+  }
+}
