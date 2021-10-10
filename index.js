@@ -17,7 +17,7 @@ import {createReadStream, createWriteStream} from 'fs';
 import indexFiles from './lib/indexer/files.js';
 import match from './lib/matcher/index.js'
 
-const BASE_URL = 'http://lamia:3000';
+const BASE_URL = 'https://ectomigo.herokuapp.com';
 
 async function run() {
   if (!context.payload.pull_request) {
