@@ -3,4 +3,4 @@
 child = require('child_process');
 path = require('path');
 
-child.fork(path.resolve(__dirname, 'index.js'), [], {execPath: "node"});
+child.fork(path.resolve(__dirname, 'dist/index.js'), [], {execPath: "node"});
