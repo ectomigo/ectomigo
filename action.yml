@@ -11,8 +11,8 @@ inputs:
     description: 'JSON mapping named data access patterns to glob arrays, e.g. {"massive": ["**/*"]}'
     required: false
 runs:
-  using: 'node16'
-  main: 'index.js'
+  using: 'node12'
+  main: 'run.cjs'
 branding:
   icon: 'database'
   color: 'white'
