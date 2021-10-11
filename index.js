@@ -33,9 +33,16 @@ async function run() {
 
   // 1. Index the current ref
   const ref = 'master';
+  const patterns = core.getInput('patterns');
+  const ignore_paths = core.getInput('ignore_paths');
+  const migration_paths = core.getInput('migration_paths')
+
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
     repo: context.repo.repo,
+    patterns: patterns ? JSON.parse(patterns) : null,
+    ignore_paths: ignore_paths ? _.castArray(ignore_paths) : null,
+    migration_paths: migration_paths ? _.castArray(migration_paths) : null,
     ref: context.ref,
     platform: 'github',
     token: uuidv4(),
