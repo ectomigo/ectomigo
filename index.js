@@ -11,7 +11,8 @@ import {v4 as uuidv4} from 'uuid';
 import {basename} from 'path';
 import FormData from 'form-data';
 import {Readable} from 'stream';
-import {pipeline} from 'stream/promises';
+import {promisify} from 'util';
+import {pipeline} from 'stream';
 import {createReadStream, createWriteStream} from 'fs';
 
 import indexFiles from './lib/indexer/files.js';
@@ -46,10 +47,10 @@ async function run() {
     gitignore: true
   });
 
-  await pipeline(
+  await promisify(pipeline(
     Readable.from(indexFiles(repo, process.cwd(), files)),
     createWriteStream('invocations.json')
-  );
+  ));
 
   const form = new FormData();
 
