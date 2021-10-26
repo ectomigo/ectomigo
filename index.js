@@ -37,6 +37,9 @@ async function run() {
     repo: context.repo.repo,
     ref: context.ref,
     platform: 'github',
+    migration_paths: process.env.MIGRATION_PATHS || null,
+    ignore_paths: process.env.IGNORE_PATHS || null,
+    patterns: process.env.PATTERNS || null,
     token: uuidv4(),
     run_id: context.run_id
   });
