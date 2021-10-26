@@ -2,7 +2,6 @@
   "name": "ectomigo-github",
   "version": "0.0.1",
   "description": "ectomigo github action",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,6 +27,8 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.15.7",
+    "@babel/preset-env": "^7.15.8",
     "@vercel/ncc": "^0.31.1"
   }
 }
