@@ -5,7 +5,7 @@ inputs:
     description: 'pass the pull request number from jwalton/gh-find-current-pr'
     required: true
   token:
-    description: 'GitHub auth token, set to ${{ secrets.GITHUB_TOKEN }}'
+    description: 'GitHub auth token, set to secrets.GITHUB_TOKEN'
     required: true
   migration_paths:
     description: 'process any changed files matching these comma-separated globs'
