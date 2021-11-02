@@ -1,3 +1,5 @@
+#!/usr/local/bin/node
+
 'use strict';
 
 import _ from 'lodash';
@@ -45,7 +47,8 @@ async function run() {
   });
 
   const {data: repo} = await axios.get(`${BASE_URL}/repos?token=${job.token}`);
-  const files = await globby([`**/*`].concat((repo.ignore_paths || []).map(p => `!**/${p}`)), {
+  const ignore = (repo.ignore_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}**/${p}`);
+  const files = await globby([`${process.env.GITHUB_WORKSPACE}**/*`].concat(ignore), {
     gitignore: true
   });
 

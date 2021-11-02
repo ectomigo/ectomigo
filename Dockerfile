@@ -8,8 +8,9 @@ RUN npm install -g npm@6
 
 RUN mkdir /srv/ectomigo
 
-COPY ./entrypoint.sh ./package.json ./package-lock.json ./index.js ./lib/ /srv/ectomigo/
+COPY ./package.json ./package-lock.json ./index.js /srv/ectomigo/
+COPY ./lib /srv/ectomigo/lib
 
 RUN cd /srv/ectomigo && npm ci
 
-ENTRYPOINT ["/srv/ectomigo/entrypoint.sh"]
+ENTRYPOINT ["/srv/ectomigo/index.js"]
