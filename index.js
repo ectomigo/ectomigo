@@ -38,6 +38,7 @@ async function run() {
     name: context.repo.owner,
     repo: context.repo.repo,
     ref: context.ref,
+    url: context.apiUrl,
     platform: 'github',
     migration_paths: _.castArray(core.getInput('migration_paths')) || null,
     ignore_paths: _.castArray(core.getInput('ignore_paths')) || null,
@@ -80,7 +81,7 @@ async function run() {
   const pullFiles = await octokit.rest.pulls.listFiles({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    pull_number: context.payload.pull_request.number,
+    pull_number: core.getInput('pull_request'),
     per_page: 100 // TODO this is the per-request max, accumulate
   });
 
@@ -138,7 +139,7 @@ async function run() {
       octokit.rest.pulls.createReviewComment({
         owner: context.repo.owner,
         repo: context.repo.repo,
-        pull_number: context.payload.pull_request.number,
+        pull_number: core.getInput('pull_request'),
         path: record.file_name,
         side: 'RIGHT',
         line: record.change[0].y1,
