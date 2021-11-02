@@ -21,6 +21,30 @@ import match from './lib/matcher/index.js'
 
 const BASE_URL = 'https://ectomigo.herokuapp.com';
 
+function getInputArray(key) {
+  const val = core.getInput(key);
+
+  if (val) {
+    return val.split(',');
+  }
+
+  return null;
+}
+
+function getInputJson(key) {
+  const val = core.getInput(key);
+
+  if (val) {
+    try {
+      return JSON.parse(val);
+    } catch (e) {
+      console.error(`unable to parse ${key} input JSON`, e);
+    }
+  }
+
+  return null;
+}
+
 async function run() {
   if (!core.getInput('pull_request')) {
     throw new Error('not a pull request!')
@@ -40,9 +64,9 @@ async function run() {
     ref: context.ref,
     url: context.apiUrl,
     platform: 'github',
-    migration_paths: _.castArray(core.getInput('migration_paths')) || null,
-    ignore_paths: _.castArray(core.getInput('ignore_paths')) || null,
-    patterns: _.castArray(core.getInput('patterns')) || null,
+    migration_paths: getInputArray('migration_paths'),
+    ignore_paths: getInputArray('ignore_paths'),
+    patterns: getInputJson('patterns'),
     token: uuidv4(),
     run_id: context.runId
   });
