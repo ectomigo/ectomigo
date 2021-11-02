@@ -39,9 +39,9 @@ async function run() {
     repo: context.repo.repo,
     ref: context.ref,
     platform: 'github',
-    migration_paths: core.getInput('migration_paths') || null,
-    ignore_paths: core.getInput('ignore_paths') || null,
-    patterns: core.getInput('patterns') || null,
+    migration_paths: _.castArray(core.getInput('migration_paths')) || null,
+    ignore_paths: _.castArray(core.getInput('ignore_paths')) || null,
+    patterns: _.castArray(core.getInput('patterns')) || null,
     token: uuidv4(),
     run_id: context.run_id
   });
