@@ -7,7 +7,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: checkout
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
       - uses: ./
         name: test
+        if: success() && steps.findPr.outputs.number
         with:
           migration_paths: migrations/**/*
+          pull_request: steps.findPr.outputs.number

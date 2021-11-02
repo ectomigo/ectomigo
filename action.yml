@@ -1,6 +1,9 @@
 name: 'ectomigo'
 description: 'index data access and manipulation code, then report on any detected migrations'
 inputs:
+  pull_request:
+    description: 'pass the pull request number from jwalton/gh-find-current-pr'
+    required: false
   migration_paths:
     description: 'process any changed files matching these comma-separated globs'
     required: false
@@ -13,10 +16,6 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  env:
-    MIGRATION_PATHS: ${{ inputs.migration_paths }}
-    IGNORE_PATHS: ${{ inputs.ignore_paths }}
-    PATTERNS: ${{ inputs.patterns }}
 branding:
   icon: 'database'
   color: 'white'

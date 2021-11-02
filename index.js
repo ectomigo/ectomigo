@@ -22,7 +22,7 @@ import match from './lib/matcher/index.js'
 const BASE_URL = 'https://ectomigo.herokuapp.com';
 
 async function run() {
-  if (!context.payload.pull_request) {
+  if (!process.env.INPUT_PULL_REQUEST) {
     throw new Error('not a pull request!')
   }
 
@@ -39,9 +39,9 @@ async function run() {
     repo: context.repo.repo,
     ref: context.ref,
     platform: 'github',
-    migration_paths: process.env.MIGRATION_PATHS || null,
-    ignore_paths: process.env.IGNORE_PATHS || null,
-    patterns: process.env.PATTERNS || null,
+    migration_paths: process.env.INPUT_MIGRATION_PATHS || null,
+    ignore_paths: process.env.INPUT_IGNORE_PATHS || null,
+    patterns: process.env.INPUT_PATTERNS || null,
     token: uuidv4(),
     run_id: context.run_id
   });
