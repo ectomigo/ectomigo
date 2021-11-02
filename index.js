@@ -44,7 +44,7 @@ async function run() {
     ignore_paths: _.castArray(core.getInput('ignore_paths')) || null,
     patterns: _.castArray(core.getInput('patterns')) || null,
     token: uuidv4(),
-    run_id: context.run_id
+    run_id: context.runId
   });
 
   const {data: repo} = await axios.get(`${BASE_URL}/repos?token=${job.token}`);
