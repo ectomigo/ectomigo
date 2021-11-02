@@ -15,3 +15,4 @@ jobs:
         with:
           migration_paths: migrations/**/*
           pull_request: steps.findPr.outputs.number
+          token: ${{ secrets.GITHUB_TOKEN }}

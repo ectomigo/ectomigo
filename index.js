@@ -22,11 +22,11 @@ import match from './lib/matcher/index.js'
 const BASE_URL = 'https://ectomigo.herokuapp.com';
 
 async function run() {
-  if (!process.env.INPUT_PULL_REQUEST) {
+  if (!core.getInput('pull_request')) {
     throw new Error('not a pull request!')
   }
 
-  const token = core.getInput('github-token');
+  const token = core.getInput('token');
 
   if (!token || token.length === 0) {
     throw new Error('token not found!');
@@ -39,9 +39,9 @@ async function run() {
     repo: context.repo.repo,
     ref: context.ref,
     platform: 'github',
-    migration_paths: process.env.INPUT_MIGRATION_PATHS || null,
-    ignore_paths: process.env.INPUT_IGNORE_PATHS || null,
-    patterns: process.env.INPUT_PATTERNS || null,
+    migration_paths: core.getInput('migration_paths') || null,
+    ignore_paths: core.getInput('ignore_paths') || null,
+    patterns: core.getInput('patterns') || null,
     token: uuidv4(),
     run_id: context.run_id
   });
