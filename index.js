@@ -71,7 +71,7 @@ async function run() {
     run_id: context.runId
   });
 
-  const {data: repo} = await axios.get(`${BASE_URL}/repos?token=${job.token}`);
+  const {data: repo} = await axios.get(`${BASE_URL}/repos?platform=github&token=${job.token}`);
   const ignore = (repo.ignore_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}**/${p}`);
   const files = await globby([`${process.env.GITHUB_WORKSPACE}**/*`].concat(ignore), {
     gitignore: true
@@ -84,6 +84,7 @@ async function run() {
 
   const form = new FormData();
 
+  form.append('platform', 'github');
   form.append('token', job.token);
   form.append('invocations', createReadStream('invocations.json'));
 
@@ -131,6 +132,7 @@ async function run() {
   console.log(changes);
 
   const {data: invocations} = await axios.post(BASE_URL, {
+    platform: 'github',
     token: job.token,
     migrations: changes
   });
