@@ -5,7 +5,7 @@
 import _ from 'lodash';
 
 import * as core from '@actions/core';
-import {context} from '@actions/github';
+import {context, getOctokit} from '@actions/github';
 import axios from 'axios';
 import minimatch from 'minimatch';
 import {globby} from 'globby';
@@ -100,7 +100,8 @@ async function run() {
 
     return;
   }
-  const octokit = core.getOctokit(token);
+
+  const octokit = getOctokit(token);
 
   const pullFiles = await octokit.rest.pulls.listFiles({
     owner: context.repo.owner,
