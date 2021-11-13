@@ -76,7 +76,12 @@ async function run() {
   const {data: repo} = await axios.get(`${BASE_URL}/repos?platform=github&token=${job.token}`);
 
   const files = await globby(
-    ['*', repo.ignore_paths || [], repo.migration_paths || []].map(p => `!${process.env.GITHUB_WORKSPACE}**/${p}`),
+    _.concat(
+      // all files....
+      [`${process.env.GITHUB_WORKSPACE}/**/*`],
+      // ....except anything in ignore or migration paths
+      _.concat(repo.ignore_paths || [], repo.migration_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}/**/${p}`)
+    ),
     { gitignore: true }
   );
 
