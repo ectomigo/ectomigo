@@ -104,7 +104,7 @@ async function run() {
 
   const octokit = getOctokit(token);
 
-  const pullFiles = await octokit.rest.pulls.listFiles({
+  const {data: pullFiles} = await octokit.rest.pulls.listFiles({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: core.getInput('pull_request'),
