@@ -13,6 +13,6 @@ jobs:
         name: test
         if: success() && steps.findPr.outputs.number
         with:
-          migration_paths: migrations/**/*
+          migration_paths: test/migrations/**/*
           pull_request: ${{ steps.findPr.outputs.number }}
           token: ${{ secrets.GITHUB_TOKEN }}

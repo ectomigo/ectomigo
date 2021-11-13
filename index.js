@@ -71,11 +71,16 @@ async function run() {
     run_id: context.runId
   });
 
+  console.log(process.env.GITHUB_WORKSPACE)
+
   const {data: repo} = await axios.get(`${BASE_URL}/repos?platform=github&token=${job.token}`);
   const ignore = (repo.ignore_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}**/${p}`);
-  const files = await globby([`${process.env.GITHUB_WORKSPACE}**/*`].concat(ignore), {
+  const files = await globby([`${process.env.GITHUB_WORKSPACE}/**/*`].concat(ignore), {
     gitignore: true
   });
+
+  console.log('ignoring', ignore)
+  console.log(files)
 
   await pipeline(
     Readable.from(indexFiles(repo, process.cwd(), files)),
@@ -110,8 +115,6 @@ async function run() {
     pull_number: core.getInput('pull_request'),
     per_page: 100 // TODO this is the per-request max, accumulate
   });
-
-  console.log(pullFiles)
 
   const migrations = repo.migration_paths.reduce((acc, p) => {
     return acc.concat(pullFiles.reduce((matches, f) => {
