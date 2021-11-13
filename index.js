@@ -111,7 +111,9 @@ async function run() {
     per_page: 100 // TODO this is the per-request max, accumulate
   });
 
-  const migrations = repo.migration_paths.concat(['lib/*.sql']).reduce((acc, p) => {
+  console.log(pullFiles)
+
+  const migrations = repo.migration_paths.reduce((acc, p) => {
     return acc.concat(pullFiles.reduce((matches, f) => {
       if (minimatch(f.filename, p)) {
         matches.push(f.filename);
