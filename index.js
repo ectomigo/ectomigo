@@ -74,12 +74,12 @@ async function run() {
   console.log(process.env.GITHUB_WORKSPACE)
 
   const {data: repo} = await axios.get(`${BASE_URL}/repos?platform=github&token=${job.token}`);
-  const ignore = (repo.ignore_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}**/${p}`);
-  const files = await globby([`${process.env.GITHUB_WORKSPACE}/**/*`].concat(ignore), {
-    gitignore: true
-  });
 
-  console.log('ignoring', ignore)
+  const files = await globby(
+    ['*', repo.ignore_paths || [], repo.migration_paths || []].map(p => `!${process.env.GITHUB_WORKSPACE}**/${p}`),
+    { gitignore: true }
+  );
+
   console.log(files)
 
   await pipeline(
@@ -108,6 +108,14 @@ async function run() {
   }
 
   const octokit = getOctokit(token);
+
+  const {data: commits} = await octokit.rest.pulls.listCommits({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: core.getInput('pull_request'),
+  });
+
+  console.log(commits)
 
   const {data: pullFiles} = await octokit.rest.pulls.listFiles({
     owner: context.repo.owner,
@@ -172,6 +180,7 @@ async function run() {
         owner: context.repo.owner,
         repo: context.repo.repo,
         pull_number: core.getInput('pull_request'),
+        commit_id: _.last(commits).sha,
         path: record.file_name,
         side: 'RIGHT',
         line: record.change[0].y1,
