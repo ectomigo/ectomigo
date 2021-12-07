@@ -1,7 +1,0 @@
-CREATE TABLE mytable (
-  id SERIAL NOT NULL PRIMARY KEY,
-  val TEXT NOT NULL;
-);
-
-CREATE VIEW myview AS
-SELECT * FROM mytable;

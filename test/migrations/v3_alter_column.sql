@@ -1,1 +1,0 @@
-ALTER TABLE mytable ALTER COLUMN val2 RENAME TO an_int;

@@ -162,14 +162,14 @@ async function run() {
     if (seen.indexOf(record.entity) === -1) {
       seen.push(record.entity);
 
-      const acc = [`${actions[record.change[0].kind]} entity \`${record.entity}\` found:\n`];
+      const acc = [`found references to ${actions[record.change[0].kind]} entity \`${record.entity}\`:\n`];
       let fileName;
 
       for (const inv of record.invocations) {
         if (fileName !== inv.file_path) {
           fileName = inv.file_path;
 
-          acc.push(`* ${record.repo} (${record.ref}): ${inv.file_path}`);
+          acc.push(`* ${record.repo} (\`${record.ref}\`): ${inv.file_path}`);
         }
 
         // TODO look for column matches to alters/ellipsize/emoji code for
@@ -178,7 +178,7 @@ async function run() {
           .map(r => r.name)
           .join(', ');
 
-        acc.push(`  - line ${inv.y1} (${columns})`);
+        acc.push(`  - line ${inv.y1} (columns ${columns})`);
       }
 
       octokit.rest.pulls.createReviewComment({

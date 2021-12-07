@@ -1,1 +1,0 @@
-ALTER TABLE mytable ADD COLUMN val2 INT;

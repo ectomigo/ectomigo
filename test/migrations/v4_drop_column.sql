@@ -1,1 +1,0 @@
-ALTER TABLE mytable DROP COLUMN val;
