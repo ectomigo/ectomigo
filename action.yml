@@ -1,6 +1,12 @@
 name: 'ectomigo'
 description: 'index data access and manipulation code, then report on any detected migrations'
 inputs:
+  pull_request:
+    description: 'pass the pull request number from jwalton/gh-find-current-pr'
+    required: true
+  token:
+    description: 'GitHub auth token, set to secrets.GITHUB_TOKEN'
+    required: true
   migration_paths:
     description: 'process any changed files matching these comma-separated globs'
     required: false
@@ -11,8 +17,8 @@ inputs:
     description: 'JSON mapping named data access patterns to glob arrays, e.g. {"massive": ["**/*"]}'
     required: false
 runs:
-  using: 'node16'
-  main: 'index.js'
+  using: 'docker'
+  image: 'Dockerfile'
 branding:
   icon: 'database'
   color: 'white'
