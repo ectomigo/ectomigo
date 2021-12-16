@@ -14,7 +14,7 @@ import {basename} from 'path';
 import FormData from 'form-data';
 import {Readable} from 'stream';
 import {pipeline} from 'stream/promises';
-import {createReadStream, createWriteStream} from 'fs';
+import {createReadStream, createWriteStream, writeFile} from 'fs';
 
 import indexFiles from './lib/indexer/files.js';
 import match from './lib/matcher/index.js'
@@ -158,10 +158,11 @@ async function run() {
   const actions = {alter_table: 'altered', drop_table: 'dropped'};
   const seen = [];
 
-  for (const record of invocations) {
+  const sarifResults = invocations.reduce((results, record) => {
     if (seen.indexOf(record.entity) === -1) {
       seen.push(record.entity);
 
+      /*
       const acc = [`found references to ${actions[record.change[0].kind]} entity \`${record.entity}\`:\n`];
       let fileName;
 
@@ -191,8 +192,74 @@ async function run() {
         line: record.change[0].y1,
         body: acc.join('\n')
       });
+      */
+
+      results.push({
+        level: 'warning', // TODO use result.kind?
+        message: {
+          text: `${actions[record.change[0].kind]} '${record.entity}' referenced in ${record.repo} (${record.ref})`
+        },
+        locations: [{
+          physicalLocation: {
+            artifactLocation: {
+              uri: record.file_name
+            },
+            region: {
+              startLine: record.change[0].y1,
+              startColumn: record.change[0].x1
+            }
+          }
+        }],
+        relatedLocations: record.invocations.map(inv => {
+          const columns = inv.is_all_columns ? 'all columns' : _.sortBy(inv.column_refs, r => r.confidence).map(r => r.name).join(', ');
+          const columnInterp = columns.length ? ` (${columns})` : '';
+
+          return {
+            message: {
+              text: `${inv.confidence * 100}% confidence${columnInterp}`
+            },
+            physicalLocation: {
+              artifactLocation: {
+                // TODO owner in report invocations?
+                uri: `https://github.com/${context.repo.owner}/${record.repo}/blob/${record.ref}/${inv.file_path}`
+              },
+              region: {
+                startLine: inv.y1,
+                startColumn: inv.x1
+              }
+            }
+          };
+        }),
+        properties: {
+        }
+      });
     }
-  }
+
+    return results;
+  });
+
+  console.log(sarifResults)
+
+  const sarif = {
+    version: '2.1.0',
+    $schema: 'https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json',
+    runs: [{
+      tool: {
+        driver: {
+          name: 'ectomigo'
+        }
+      },
+      results: sarifResults
+    }],
+    automationDetails: {
+      description: {
+        text: `ectomigo run for ${context.repo.owner}/${context.repo.repo} ref ${ref} (${job.created_at})`
+      },
+      id: `ectomigo/${context.repo.owner}/${context.repo.repo}/${ref}`
+    }
+  };
+
+  await writeFile('./ectomigo.sarif.json', JSON.stringify(sarif, null, 2));
 }
 
 try {
