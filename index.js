@@ -122,11 +122,10 @@ async function run() {
 
   console.log(commits)
 
-  const {data: pullFiles} = await octokit.rest.pulls.listFiles({
+  const {data: pullFiles} = await octokit.paginate(octokit.rest.pulls.listFiles, {
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: core.getInput('pull_request'),
-    per_page: 100 // TODO this is the per-request max, accumulate
   });
 
   const migrations = repo.migration_paths.reduce((acc, p) => {
