@@ -8,6 +8,7 @@ import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import axios from 'axios';
 import minimatch from 'minimatch';
+import murmurhash from 'murmurhash';
 import {globby} from 'globby';
 import {v4 as uuidv4} from 'uuid';
 import {basename} from 'path';
@@ -57,7 +58,6 @@ async function run() {
   }
 
   // 1. Index the current ref
-  const ref = 'master';
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
     repo: context.repo.repo,
@@ -68,10 +68,11 @@ async function run() {
     ignore_paths: getInputArray('ignore_paths'),
     patterns: getInputJson('patterns'),
     token: uuidv4(),
+    details: {
+      pull_number: core.getInput('pull_request')
+    },
     run_id: context.runId
   });
-
-  console.log(process.env.GITHUB_WORKSPACE)
 
   const {data: repo} = await axios.get(`${BASE_URL}/repos?platform=github&token=${job.token}`);
 
@@ -102,7 +103,7 @@ async function run() {
     headers: form.getHeaders()
   });
 
-  console.log(`indexed ${count} database invocations in ${repo.name}/${ref}`);
+  console.log(`indexed ${count} database invocations in ${context.repo.repo}/${context.ref}`);
 
   // 2. Scan any migrations added/modified in the PR
 
@@ -114,19 +115,13 @@ async function run() {
 
   const octokit = getOctokit(token);
 
-  const {data: commits} = await octokit.rest.pulls.listCommits({
+  const pullFiles = await octokit.paginate(octokit.rest.pulls.listFiles, {
     owner: context.repo.owner,
     repo: context.repo.repo,
-    pull_number: core.getInput('pull_request'),
+    pull_number: job.details.pull_number
   });
 
-  console.log(commits)
-
-  const {data: pullFiles} = await octokit.paginate(octokit.rest.pulls.listFiles, {
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    pull_number: core.getInput('pull_request'),
-  });
+  console.log(pullFiles)
 
   const migrations = repo.migration_paths.reduce((acc, p) => {
     return acc.concat(pullFiles.reduce((matches, f) => {
@@ -156,19 +151,42 @@ async function run() {
 
   const actions = {alter_table: 'altered', drop_table: 'dropped'};
   const seen = [];
+  const comments = [];
+
+  // index previous comments so we can see if any of our current findings are redundant
+
+  const allComments = await octokit.paginate(octokit.rest.pulls.listReviewComments, {
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: job.details.pull_number
+  });
+
+  console.log(allComments)
+
+  const toDelete = allComments.reduce((acc, comment) => {
+    if (comment.user.login === 'github-actions[bot]' && comment.body.startsWith('ectomigo found')) {
+      acc[murmurhash.v3(`${comment.path}:${comment.line}:${comment.body}`)] = comment;
+    }
+
+    return acc;
+  }, {});
+
+  console.log(toDelete)
+
+  // generate new comments from the matched invocations
 
   for (const record of invocations) {
     if (seen.indexOf(record.entity) === -1) {
       seen.push(record.entity);
 
-      const acc = [`found references to ${actions[record.change[0].kind]} entity \`${record.entity}\`:\n`];
+      const acc = [`ectomigo found references to ${actions[record.change[0].kind]} entity \`${record.entity}\`:\n`];
       let fileName;
 
       for (const inv of record.invocations) {
         if (fileName !== inv.file_path) {
           fileName = inv.file_path;
 
-          acc.push(`* ${record.repo} (\`${record.ref}\`): ${inv.file_path}`);
+          acc.push(`* in ${record.repo} (\`${record.ref}\`): ${inv.file_path}`);
         }
 
         // TODO look for column matches to alters/ellipsize/emoji code for
@@ -180,17 +198,52 @@ async function run() {
         acc.push(`  - line ${inv.y1} (columns ${columns})`);
       }
 
-      octokit.rest.pulls.createReviewComment({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: core.getInput('pull_request'),
-        commit_id: _.last(commits).sha,
-        path: record.file_name,
-        side: 'RIGHT',
-        line: record.change[0].y1,
-        body: acc.join('\n')
-      });
+      const body = acc.join('\n');
+      const key = murmurhash.v3(`${record.file_name}:${record.change[0].y1}:${body}`);
+
+      if (toDelete[key]) {
+        // identical comment already exists, keep it
+        delete toDelete[key];
+      } else {
+        comments.push({
+          path: record.file_name,
+          line: record.change[0].y1,
+          body
+        });
+      }
     }
+  }
+
+  // remove remaining comments from previous runs
+
+  console.log(toDelete)
+
+  for (const key in toDelete) {
+    await octokit.rest.issues.deleteComment({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      comment_id: toDelete[key].id
+    });
+  }
+
+  // and finally, create the new review
+
+  console.log(comments)
+
+  if (comments.length > 0) {
+    await octokit.rest.pulls.createReview({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: job.details.pull_number,
+      event: 'COMMENT',
+      body: `ectomigo found references to database objects modified in this pull request. Review its comments and assess the potential impact of individual migration changes before merging.`,
+      comments: comments.map(comment => ({
+        side: 'RIGHT',
+        path: comment.path,
+        line: comment.line,
+        body: comment.body
+      }))
+    });
   }
 }
 
