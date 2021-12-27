@@ -219,7 +219,7 @@ async function run() {
   console.log(toDelete)
 
   for (const key in toDelete) {
-    await octokit.rest.issues.deleteComment({
+    await octokit.rest.pulls.deleteReviewComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       comment_id: toDelete[key].id
