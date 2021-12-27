@@ -1,0 +1,1 @@
+ALTER TABLE one DROP COLUMN val;

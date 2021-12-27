@@ -1,0 +1,1 @@
+ALTER TABLE one ALTER COLUMN val2 RENAME TO an_int;
