@@ -195,7 +195,11 @@ async function run() {
           .map(r => r.name)
           .join(', ');
 
-        acc.push(`  - line ${inv.y1} (columns ${columns})`);
+        if (columns.length > 0) {
+          acc.push(`  - line ${inv.y1} (columns: ${columns})`);
+        } else {
+          acc.push(`  - line ${inv.y1}`);
+        }
       }
 
       const body = acc.join('\n');
