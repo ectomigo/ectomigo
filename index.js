@@ -57,7 +57,6 @@ async function run() {
     throw new Error('token not found!');
   }
 
-  // 1. Index the current ref
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
     repo: context.repo.repo,
@@ -67,21 +66,21 @@ async function run() {
     migration_paths: getInputArray('migration_paths'),
     ignore_paths: getInputArray('ignore_paths'),
     patterns: getInputJson('patterns'),
-    token: uuidv4(),
+    token: uuidv4(), // make up a new token for external use
     details: {
       pull_number: core.getInput('pull_request')
     },
     run_id: context.runId
   });
 
-  const {data: repo} = await axios.get(`${BASE_URL}/repos?platform=github&token=${job.token}`);
+  // 1. Index the current ref
 
   const files = await globby(
     _.concat(
       // all files....
       [`${process.env.GITHUB_WORKSPACE}/**/*`],
       // ....except anything in ignore or migration paths
-      _.concat(repo.ignore_paths || [], repo.migration_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}/**/${p}`)
+      _.concat(job.ignore_paths || [], job.migration_paths || []).map(p => `!${process.env.GITHUB_WORKSPACE}/**/${p}`)
     ),
     { gitignore: true }
   );
@@ -89,7 +88,7 @@ async function run() {
   console.log(files)
 
   await pipeline(
-    Readable.from(indexFiles(repo, process.cwd(), files)),
+    Readable.from(indexFiles(job, process.cwd(), files)),
     createWriteStream('invocations.json')
   );
 
@@ -107,7 +106,7 @@ async function run() {
 
   // 2. Scan any migrations added/modified in the PR
 
-  if (!repo.migration_paths) {
+  if (!job.migration_paths) {
     console.log(`no migration paths configured for ${context.repo.repo}, all done!`);
 
     return;
@@ -123,7 +122,7 @@ async function run() {
 
   console.log(pullFiles)
 
-  const migrations = repo.migration_paths.reduce((acc, p) => {
+  const migrations = job.migration_paths.reduce((acc, p) => {
     return acc.concat(pullFiles.reduce((matches, f) => {
       if (minimatch(f.filename, p)) {
         matches.push(f.filename);
