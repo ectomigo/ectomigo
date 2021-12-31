@@ -148,7 +148,12 @@ async function run() {
     migrations: changes
   });
 
-  const actions = {alter_table: 'altered', drop_table: 'dropped'};
+  const actions = {
+    alter_table: 'altered',
+    drop_table: 'dropped',
+    alter_view: 'altered',
+    drop_view: 'dropped'
+  };
   const seen = [];
   const comments = [];
 
