@@ -60,7 +60,7 @@ async function run() {
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
     repo: context.repo.repo,
-    ref: context.ref_name,
+    ref: context.ref,
     url: `${context.server_url}/${context.repo.owner}/${context.repo.repo}`,
     platform: 'github',
     migration_paths: getInputArray('migration_paths'),
@@ -102,7 +102,7 @@ async function run() {
     headers: form.getHeaders()
   });
 
-  console.log(`indexed ${count} database invocations in ${context.repo.repo}/${context.ref_name}`);
+  console.log(`indexed ${count} database invocations in ${context.repo.repo}/${context.ref}`);
 
   // 2. Scan any migrations added/modified in the PR
 
