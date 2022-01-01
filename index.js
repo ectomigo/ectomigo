@@ -66,7 +66,6 @@ async function run() {
     migration_paths: getInputArray('migration_paths'),
     ignore_paths: getInputArray('ignore_paths'),
     patterns: getInputJson('patterns'),
-    token: uuidv4(), // make up a new token for external use
     details: {
       pull_number: core.getInput('pull_request')
     },
@@ -95,7 +94,7 @@ async function run() {
   const form = new FormData();
 
   form.append('platform', 'github');
-  form.append('token', job.token);
+  form.append('token', job.job_id);
   form.append('invocations', createReadStream('invocations.json'));
 
   const {data: count} = await axios.post(`${BASE_URL}/upload`, form, {
@@ -144,7 +143,7 @@ async function run() {
 
   const {data: invocations} = await axios.post(BASE_URL, {
     platform: 'github',
-    token: job.token,
+    token: job.job_id,
     migrations: changes
   });
 
