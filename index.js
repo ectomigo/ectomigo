@@ -222,10 +222,11 @@ async function run() {
           .map(r => r.name)
           .join(', ');
 
+        // TODO index and include statement type
         if (columns.length > 0) {
-          acc.push(`  - line ${inv.y1} (columns: ${columns})`);
+          acc.push(`  - [line ${inv.y1}](${fileUrl}#L${inv.y1}) (columns: ${columns})`);
         } else {
-          acc.push(`  - line ${inv.y1}`);
+          acc.push(`  - [line ${inv.y1}](${fileUrl}#L${inv.y1})`);
         }
       }
     }
