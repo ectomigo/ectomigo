@@ -147,15 +147,6 @@ async function run() {
     migrations: changes
   });
 
-  const actions = {
-    alter_table: 'altered',
-    drop_table: 'dropped',
-    alter_view: 'altered',
-    drop_view: 'dropped'
-  };
-  const seen = [];
-  const comments = [];
-
   // index previous comments so we can see if any of our current findings are redundant
 
   const allComments = await octokit.paginate(octokit.rest.pulls.listReviewComments, {
@@ -176,20 +167,32 @@ async function run() {
 
   console.log(toDelete)
 
-  // generate new comments from the matched invocations
+  // generate new comments from the matched invocations; each record includes
+  // all references in a single repository (this or another) for a single
+  // entity which has been changed in the scope of a single migration, yielding
+  // migration file name and changes, entity name, target repository and ref,
+  // and indexed invocations in that target repository.
 
-  for (const record of invocations) {
-    if (seen.indexOf(record.entity) === -1) {
-      seen.push(record.entity);
+  const comments = [];
+  const byEntity = _.groupBy(invocations, i => i.entity);
 
-      const acc = [`ectomigo found references to ${actions[record.change[0].kind]} entity \`${record.entity}\`:\n`];
+  for (const entity in byEntity) {
+    let isDropped = false;
+    const acc = [];
+
+    for (const record of byEntity[entity]) {
+      isDropped = isDropped || record.change.some(c => c.kind.startsWith('drop_'));
+
+      acc.push('');
+      acc.push(`####${record.repo} (\`${record.ref}\`)`);
+
       let fileName;
 
       for (const inv of record.invocations) {
         if (fileName !== inv.file_path) {
           fileName = inv.file_path;
 
-          acc.push(`* in ${record.repo} (\`${record.ref}\`): ${inv.file_path}`);
+          acc.push(`\`${inv.file_path}\`:`);
         }
 
         // TODO look for column matches to alters/ellipsize/emoji code for
@@ -204,20 +207,23 @@ async function run() {
           acc.push(`  - line ${inv.y1}`);
         }
       }
+    }
 
-      const body = acc.join('\n');
-      const key = murmurhash.v3(`${record.file_name}:${record.change[0].y1}:${body}`);
+    const body = [`ectomigo found references to ${isDropped ? 'altered' : 'dropped'} entity \`${record.entity}\`:\n`]
+      .concat(acc)
+      .join('\n');
+    const key = murmurhash.v3(`${record.file_name}:${record.change[0].y1}:${body}`);
 
-      if (toDelete[key]) {
-        // identical comment already exists, keep it
-        delete toDelete[key];
-      } else {
-        comments.push({
-          path: record.file_name,
-          line: record.change[0].y1,
-          body
-        });
-      }
+    if (toDelete[key]) {
+      // identical comment already exists, keep it
+      delete toDelete[key];
+    } else {
+      // comment on the first modification
+      comments.push({
+        path: byEntity[0].file_name,
+        line: byEntity[0].change[0].y1,
+        body
+      });
     }
   }
 
