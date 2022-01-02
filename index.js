@@ -209,7 +209,7 @@ async function run() {
         if (fileName !== inv.file_path) {
           fileName = inv.file_path;
 
-          acc.push(`\`${inv.file_path}\`:`);
+          acc.push(`[\`${inv.file_path}\`](${record.url}/blob/${record.ref}/${inv.file_path})`);
         }
 
         // TODO look for column matches to alters/ellipsize/emoji code for
