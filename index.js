@@ -200,7 +200,7 @@ async function run() {
 
       seen.push(record.repo);
 
-      const scanned = record.scanned_at.toISOString().split('T')[0];
+      const scanned = new Date(record.scanned_at).toISOString().split('T')[0];
 
       acc.push('');
       acc.push(`#### in repository [${record.repo}](${record.url}) (\`${record.ref}\`) as of ${scanned}`);
