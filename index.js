@@ -213,6 +213,7 @@ async function run() {
         if (fileName !== inv.file_path) {
           fileName = inv.file_path;
 
+          acc.push('');
           acc.push(`[\`${inv.file_path}\`](${fileUrl})`);
         }
 
