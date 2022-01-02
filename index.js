@@ -209,10 +209,11 @@ async function run() {
       }
     }
 
-    const body = [`ectomigo found references to ${isDropped ? 'altered' : 'dropped'} entity \`${record.entity}\`:\n`]
+    const anchor = byEntity[0];
+    const body = [`ectomigo found references to ${isDropped ? 'altered' : 'dropped'} entity \`${entity}\`:\n`]
       .concat(acc)
       .join('\n');
-    const key = murmurhash.v3(`${record.file_name}:${record.change[0].y1}:${body}`);
+    const key = murmurhash.v3(`${anchor.file_name}:${anchor.change[0].y1}:${body}`);
 
     if (toDelete[key]) {
       // identical comment already exists, keep it
@@ -220,8 +221,8 @@ async function run() {
     } else {
       // comment on the first modification
       comments.push({
-        path: byEntity[0].file_name,
-        line: byEntity[0].change[0].y1,
+        path: anchor.file_name,
+        line: anchor.change[0].y1,
         body
       });
     }
