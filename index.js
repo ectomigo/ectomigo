@@ -200,16 +200,20 @@ async function run() {
 
       seen.push(record.repo);
 
+      const scanned = record.scanned_at.toISOString().split('T')[0];
+
       acc.push('');
-      acc.push(`#### in repository [${record.repo}](${record.url}) (\`${record.ref}\`)`);
+      acc.push(`#### in repository [${record.repo}](${record.url}) (\`${record.ref}\`) as of ${scanned}`);
 
       let fileName;
 
       for (const inv of record.invocations) {
+        const fileUrl = `${record.url}/blob/${record.ref}/${inv.file_path}`;
+
         if (fileName !== inv.file_path) {
           fileName = inv.file_path;
 
-          acc.push(`[\`${inv.file_path}\`](${record.url}/blob/${record.ref}/${inv.file_path})`);
+          acc.push(`[\`${inv.file_path}\`](${fileUrl})`);
         }
 
         // TODO look for column matches to alters/ellipsize/emoji code for
