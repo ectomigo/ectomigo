@@ -1,6 +1,6 @@
 {
   "name": "ectomigo-github",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ectomigo github action",
   "type": "module",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dian M Fay",
-  "license": "SEE LICENSE IN ./LICENSE",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@actions/core": "^1.5.0",
     "@actions/github": "^5.0.0",
