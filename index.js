@@ -209,7 +209,7 @@ async function run() {
       }
     }
 
-    const anchor = byEntity[0];
+    const anchor = byEntity[entity][0];
     const body = [`ectomigo found references to ${isDropped ? 'altered' : 'dropped'} entity \`${entity}\`:\n`]
       .concat(acc)
       .join('\n');
