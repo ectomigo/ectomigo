@@ -201,7 +201,7 @@ async function run() {
       seen.push(record.repo);
 
       acc.push('');
-      acc.push(`#### [${record.repo}](${record.url}) (\`${record.ref}\`)`);
+      acc.push(`#### in repository [${record.repo}](${record.url}) (\`${record.ref}\`)`);
 
       let fileName;
 
@@ -227,7 +227,7 @@ async function run() {
     }
 
     const anchor = byEntity[entity][0];
-    const body = [`ectomigo found references to ${isDropped ? 'altered' : 'dropped'} entity \`${entity}\`:\n`]
+    const body = [`ectomigo found references to ${isDropped ? 'dropped' : 'altered'} entity \`${entity}\`:\n`]
       .concat(acc)
       .join('\n');
     const key = murmurhash.v3(`${anchor.file_name}:${anchor.change[0].y1}:${body}`);
