@@ -57,11 +57,13 @@ async function run() {
     throw new Error('token not found!');
   }
 
+  const ref = _.last(context.ref.split('/'))
+
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
     repo: context.repo.repo,
-    ref: context.ref,
-    url: `${context.server_url}/${context.repo.owner}/${context.repo.repo}`,
+    ref,
+    url: `https://github.com/${context.repo.owner}/${context.repo.repo}`,
     platform: 'github',
     migration_paths: getInputArray('migration_paths'),
     ignore_paths: getInputArray('ignore_paths'),
@@ -101,7 +103,7 @@ async function run() {
     headers: form.getHeaders()
   });
 
-  console.log(`indexed ${count} database invocations in ${context.repo.repo}/${context.ref}`);
+  console.log(`indexed ${count} database invocations in ${context.repo.repo}/${ref}`);
 
   // 2. Scan any migrations added/modified in the PR
 
@@ -176,15 +178,30 @@ async function run() {
   const comments = [];
   const byEntity = _.groupBy(invocations, i => i.entity);
 
+  console.log(byEntity)
+
   for (const entity in byEntity) {
     let isDropped = false;
+    const seen = [];
     const acc = [];
 
     for (const record of byEntity[entity]) {
+      console.log(entity, record.change)
+
       isDropped = isDropped || record.change.some(c => c.kind.startsWith('drop_'));
 
+      if (seen.indexOf(record.repo) > -1) {
+        // if an entity is affected by multiple migration files, we'll see one
+        // record per migration per target repo, but -- other than whether this
+        // particular migration alters or drops the entity -- all the important
+        // info will be identical.
+        continue;
+      }
+
+      seen.push(record.repo);
+
       acc.push('');
-      acc.push(`####${record.repo} (\`${record.ref}\`)`);
+      acc.push(`#### [${record.repo}](${record.url}) (\`${record.ref}\`)`);
 
       let fileName;
 
