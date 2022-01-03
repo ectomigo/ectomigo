@@ -47,10 +47,6 @@ function getInputJson(key) {
 }
 
 async function run() {
-  if (!core.getInput('pull_request')) {
-    throw new Error('not a pull request!')
-  }
-
   const token = core.getInput('token');
 
   if (!token || token.length === 0) {
@@ -105,9 +101,13 @@ async function run() {
 
   console.log(`indexed ${count} database invocations in ${context.repo.repo}/${ref}`);
 
-  // 2. Scan any migrations added/modified in the PR
+  // 2. Scan any migrations added/modified in a pull request
 
-  if (!job.migration_paths) {
+  if (!core.getInput('pull_request')) {
+    console.log('not a pull request, all done!');
+
+    return;
+  } else if (!job.migration_paths) {
     console.log(`no migration paths configured for ${context.repo.repo}, all done!`);
 
     return;
