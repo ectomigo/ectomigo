@@ -64,12 +64,19 @@ async function run() {
     migration_paths: getInputArray('migration_paths'),
     ignore_paths: getInputArray('ignore_paths'),
     patterns: getInputJson('patterns'),
+    main_branches: getInputArray('main_branches'),
     details: {
       pull_number: core.getInput('pull_request')
     },
     run_id: context.runId
   });
 
+  // TODO grab all comments here and look for control commands:
+  //   !ectomigo off -- disable
+  //   !ectomigo on -- reenable
+  //
+  // use reactions to track what we've already seen
+  //
   // 1. Index the current ref
 
   const files = await globby(

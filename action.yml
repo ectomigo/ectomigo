@@ -16,6 +16,9 @@ inputs:
   patterns:
     description: 'JSON mapping named data access patterns to glob arrays, e.g. {"massive": ["**/*"]}'
     required: false
+  main_branches:
+    description: 'matches found in these branches will be reported to other repositories'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
