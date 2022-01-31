@@ -53,7 +53,7 @@ async function run() {
     throw new Error('token not found!');
   }
 
-  const ref = _.last(context.ref.split('/'))
+  const ref = _.last(context.ref.split('/'));
 
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
@@ -69,7 +69,12 @@ async function run() {
       pull_number: core.getInput('pull_request')
     },
     run_id: context.runId
-  });
+  }).then(resp => resp) // ignore axios logdump
+    .catch(err => err.response);
+
+  if (job.error) {
+    throw new Error(`${job.error}: ${job.message}`);
+  }
 
   // TODO grab all comments here and look for control commands:
   //   !ectomigo off -- disable
@@ -104,7 +109,12 @@ async function run() {
 
   const {data: count} = await axios.post(`${BASE_URL}/upload`, form, {
     headers: form.getHeaders()
-  });
+  }).then(resp => resp) // ignore axios logdump
+    .catch(err => err.response);
+
+  if (count.error) {
+    throw new Error(`${count.error}: ${count.message}`);
+  }
 
   console.log(`indexed ${count} database invocations in ${context.repo.repo}/${ref}`);
 
@@ -154,7 +164,12 @@ async function run() {
     platform: 'github',
     token: job.job_id,
     migrations: changes
-  });
+  }).then(resp => resp) // ignore axios logdump
+    .catch(err => err.response);
+
+  if (invocations.error) {
+    throw new Error(`${invocations.error}: ${invocations.message}`);
+  }
 
   // index previous comments so we can see if any of our current findings are redundant
 
