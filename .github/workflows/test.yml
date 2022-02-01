@@ -11,7 +11,7 @@ jobs:
         id: findPr
       - uses: ./
         name: test
-        if: success() && steps.findPr.outputs.number
+        if: success()
         with:
           migration_paths: test/migrations/**/*
           pull_request: ${{ steps.findPr.outputs.number }}
