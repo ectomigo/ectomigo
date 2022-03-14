@@ -53,7 +53,24 @@ async function run() {
     throw new Error('token not found!');
   }
 
+  const octokit = getOctokit(token);
+
+  const jobDetails = {};
   const ref = _.last(context.ref.split('/'));
+
+  const prs = await octokit.paginate(octokit.rest.repos.listPullRequestsAssociatedWithCommit, {
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    commit_sha: context.sha
+  });
+
+  const activePullRequest = prs.find(pr => pr.state === 'open');
+
+  console.log(activePullRequest);
+
+  if (activePullRequest) {
+    jobDetails.pull_number = activePullRequest.number;
+  }
 
   const {data: job} = await axios.post(`${BASE_URL}/jobs`, {
     name: context.repo.owner,
@@ -65,9 +82,7 @@ async function run() {
     ignore_paths: getInputArray('ignore_paths'),
     patterns: getInputJson('patterns'),
     main_branches: getInputArray('main_branches'),
-    details: {
-      pull_number: core.getInput('pull_request')
-    },
+    details: jobDetails,
     run_id: context.runId
   }).then(resp => resp) // ignore axios logdump
     .catch(err => err.response);
@@ -120,8 +135,8 @@ async function run() {
 
   // 2. Scan any migrations added/modified in a pull request
 
-  if (!core.getInput('pull_request')) {
-    console.log('not a pull request, all done!');
+  if (!activePullRequest) {
+    console.log('no open pull request, all done!');
 
     return;
   } else if (!job.migration_paths) {
@@ -129,8 +144,6 @@ async function run() {
 
     return;
   }
-
-  const octokit = getOctokit(token);
 
   const pullFiles = await octokit.paginate(octokit.rest.pulls.listFiles, {
     owner: context.repo.owner,
