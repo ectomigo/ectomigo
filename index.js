@@ -254,9 +254,9 @@ async function run() {
 
         // TODO look for column matches to alters/ellipsize/emoji code for
         // confidence? we can't color text unfortunately
-        const columns = inv.is_all_columns ? 'all columns' : _.sortBy(inv.column_refs, r => r.confidence)
-          .map(r => r.name)
-          .join(', ');
+        const columns = inv.is_all_columns
+          ? 'all columns'
+          : [...new Set(_.sortBy(inv.column_refs, r => r.confidence).map(r => r.name))].join(', ');
 
         // TODO index and include statement type
         if (columns.length > 0) {
