@@ -1,8 +1,9 @@
 build:
 	rm -r ./lib
 	cp -r ../core/lib .
-	# TODO wire this in better
-	jq -s '(.[1].dependencies=(.[1].dependencies * .[0].dependencies))[1]' ../core/package.json github.package.json > package.json
+	# combine dependencies from core
+	jq -s '(.[1].dependencies=(.[1].dependencies * .[0].dependencies))[1]' ../core/package.json package.json > temp.package.json
+	mv temp.package.json package.json
 	npm i
 
 build-test:
