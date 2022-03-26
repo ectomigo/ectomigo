@@ -1,6 +1,6 @@
 {
   "name": "ectomigo-github",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "ectomigo github action",
   "type": "module",
   "main": "index.js",

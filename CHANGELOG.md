@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/ectomigo/ectomigo/compare/v0.1.5...v0.1.6) (2022-03-26)
+
+
+### Bug Fixes
+
+* deduplicate column names in comments ([28ea184](https://github.com/ectomigo/ectomigo/commit/28ea1844d887af405924fa0bf5e58efaf21c1e88))
+
 ### [0.1.5](https://github.com/ectomigo/ectomigo/compare/v0.1.4...v0.1.5) (2022-03-15)
 
 ### [0.1.4](https://github.com/ectomigo/ectomigo/compare/v0.1.3...v0.1.4) (2022-02-11)
