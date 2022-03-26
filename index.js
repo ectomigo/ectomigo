@@ -10,15 +10,13 @@ import axios from 'axios';
 import minimatch from 'minimatch';
 import murmurhash from 'murmurhash';
 import {globby} from 'globby';
-import {v4 as uuidv4} from 'uuid';
-import {basename} from 'path';
 import FormData from 'form-data';
 import {Readable} from 'stream';
 import {pipeline} from 'stream/promises';
 import {createReadStream, createWriteStream} from 'fs';
 
 import indexFiles from './lib/indexer/files.js';
-import match from './lib/matcher/index.js'
+import match from './lib/matcher/index.js';
 
 const BASE_URL = 'https://ectomigo.herokuapp.com';
 
@@ -163,6 +161,8 @@ async function run() {
     return;
   }
 
+  console.log(`evaluating ${migrations.length} migration changes`);
+
   const changes = await match(job, migrations);
 
   const {data: invocations} = await axios.post(BASE_URL, {
@@ -175,6 +175,8 @@ async function run() {
   if (invocations.error) {
     throw new Error(`${invocations.error}: ${invocations.message}`);
   }
+
+  console.log(`matched ${invocations.length} invocations`);
 
   // index previous comments so we can see if any of our current findings are redundant
 
@@ -290,7 +292,7 @@ async function run() {
       repo: context.repo.repo,
       pull_number: job.details.pull_number,
       event: 'COMMENT',
-      body: `ectomigo found references to database objects modified in this pull request. Review its comments and assess the potential impact of individual migration changes before merging.`,
+      body: 'ectomigo found references to database objects modified in this pull request. Review its comments and assess the potential impact of individual migration changes before merging.',
       comments: comments.map(comment => ({
         side: 'RIGHT',
         path: comment.path,
@@ -299,6 +301,8 @@ async function run() {
       }))
     });
   }
+
+  console.log(`${comments.length} new comments for review`);
 }
 
 try {
