@@ -66,8 +66,6 @@ async function run() {
 
   const activePullRequest = prs.find(pr => pr.state === 'open');
 
-  console.log(activePullRequest);
-
   if (activePullRequest) {
     jobDetails.pull_number = activePullRequest.number;
   }
@@ -109,8 +107,6 @@ async function run() {
     { gitignore: true }
   );
 
-  console.log(files)
-
   await pipeline(
     Readable.from(indexFiles(job, process.cwd(), files)),
     createWriteStream('invocations.json')
@@ -151,8 +147,6 @@ async function run() {
     pull_number: job.details.pull_number
   });
 
-  console.log(pullFiles)
-
   const migrations = job.migration_paths.reduce((acc, p) => {
     return acc.concat(pullFiles.reduce((matches, f) => {
       if (minimatch(f.filename, p)) {
@@ -163,7 +157,6 @@ async function run() {
     }, []));
   }, []);
 
-  console.log(migrations)
   if (migrations.length === 0) {
     console.log('no migration changes detected in pull request, all done!');
 
@@ -171,7 +164,6 @@ async function run() {
   }
 
   const changes = await match(job, migrations);
-  console.log(changes);
 
   const {data: invocations} = await axios.post(BASE_URL, {
     platform: 'github',
@@ -192,8 +184,6 @@ async function run() {
     pull_number: job.details.pull_number
   });
 
-  console.log(allComments)
-
   const toDelete = allComments.reduce((acc, comment) => {
     if (comment.user.login === 'github-actions[bot]' && comment.body.startsWith('ectomigo found')) {
       acc[murmurhash.v3(`${comment.path}:${comment.line}:${comment.body}`)] = comment;
@@ -201,8 +191,6 @@ async function run() {
 
     return acc;
   }, {});
-
-  console.log(toDelete)
 
   // generate new comments from the matched invocations; each record includes
   // all references in a single repository (this or another) for a single
@@ -213,16 +201,12 @@ async function run() {
   const comments = [];
   const byEntity = _.groupBy(invocations, i => i.entity);
 
-  console.log(byEntity)
-
   for (const entity in byEntity) {
     let isDropped = false;
     const seen = [];
-    const acc = [];
+    const acc = []; // TODO this can sometimes sort non-deterministically, voiding hashes
 
     for (const record of byEntity[entity]) {
-      console.log(entity, record.change)
-
       isDropped = isDropped || record.change.some(c => c.kind.startsWith('drop_'));
 
       if (seen.indexOf(record.repo) > -1) {
@@ -256,9 +240,11 @@ async function run() {
         // confidence? we can't color text unfortunately
         const columns = inv.is_all_columns
           ? 'all columns'
+          // js sets preserve insertion order
+          // TODO bold if it matches an ALTER COLUMN
           : [...new Set(_.sortBy(inv.column_refs, r => r.confidence).map(r => r.name))].join(', ');
 
-        // TODO index and include statement type
+        // TODO index and include statement type?
         if (columns.length > 0) {
           acc.push(`  - [line ${inv.y1}](${fileUrl}#L${inv.y1}) (columns: ${columns})`);
         } else {
@@ -288,8 +274,6 @@ async function run() {
 
   // remove remaining comments from previous runs
 
-  console.log(toDelete)
-
   for (const key in toDelete) {
     await octokit.rest.pulls.deleteReviewComment({
       owner: context.repo.owner,
@@ -299,8 +283,6 @@ async function run() {
   }
 
   // and finally, create the new review
-
-  console.log(comments)
 
   if (comments.length > 0) {
     await octokit.rest.pulls.createReview({
