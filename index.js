@@ -4,6 +4,7 @@
 
 import _ from 'lodash';
 
+import {readFile} from 'fs/promises';
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import axios from 'axios';
@@ -52,10 +53,10 @@ async function run() {
   }
 
   const octokit = getOctokit(token);
-
   const jobDetails = {};
   const ref = _.last(context.ref.split('/'));
 
+  const pkg = await readFile('/srv/ectomigo/package.json'); // fs uses the cwd!
   const prs = await octokit.paginate(octokit.rest.repos.listPullRequestsAssociatedWithCommit, {
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -74,6 +75,7 @@ async function run() {
     ref,
     url: `https://github.com/${context.repo.owner}/${context.repo.repo}`,
     platform: 'github',
+    module_version: JSON.parse(pkg).version,
     migration_paths: getInputArray('migration_paths'),
     ignore_paths: getInputArray('ignore_paths'),
     patterns: getInputJson('patterns'),

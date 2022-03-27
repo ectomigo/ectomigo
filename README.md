@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: checkout
-      - uses: ectomigo/ectomigo@v0.1.7
+      - uses: ectomigo/ectomigo@v0.1.8
         name: test
         with:
           main_branches: main,release
