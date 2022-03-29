@@ -1,8 +1,8 @@
 name: 'ectomigo'
-description: 'index data access and manipulation code, then report on any detected migrations'
+description: 'Measure the impact of database schema changes before you merge'
 inputs:
   token:
-    description: 'GitHub auth token, set to secrets.GITHUB_TOKEN'
+    description: 'GitHub auth token'
     required: true
   migration_paths:
     description: 'process any changed files matching these comma-separated globs'
