@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.com/ectomigo/ectomigo/compare/v0.1.7...v0.1.8) (2022-03-29)
+
+
+### Features
+
+* send platform and version with job ([c1bac45](https://github.com/ectomigo/ectomigo/commit/c1bac45e9b33c2e31c251416ba7415db1c94cce1))
+
 ### [0.1.7](https://github.com/ectomigo/ectomigo/compare/v0.1.6...v0.1.7) (2022-03-26)
 
 ### [0.1.6](https://github.com/ectomigo/ectomigo/compare/v0.1.5...v0.1.6) (2022-03-26)
